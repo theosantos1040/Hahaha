@@ -1,0 +1,197 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENI & LO | Ultra 3D Bypass</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Orbitron:wght@400;900&display=swap');
+
+        :root {
+            --neon-purple: #a855f7;
+            --neon-cyan: #22d3ee;
+            --deep-black: #020202;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--deep-black);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: 0; }
+
+        .glass-card {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(15, 15, 15, 0.95) 0%, rgba(5, 5, 5, 0.98) 100%);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 40px;
+            padding: 2.5rem;
+            width: 450px;
+            box-shadow: 0 0 100px rgba(168, 85, 247, 0.15);
+            transform-style: preserve-3d;
+            text-align: center;
+        }
+
+        .image-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 1.5rem;
+            transform-style: preserve-3d;
+        }
+
+        .energy-ring {
+            position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-purple);
+            box-shadow: 0 0 20px var(--neon-purple);
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
+        .profile-img {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            transform: translateZ(50px);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        h1 {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.5rem;
+            background: linear-gradient(to right, #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .tutorial {
+            font-size: 0.65rem;
+            color: #888;
+            border: 1px dashed #333;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            background: #000;
+            border: 1px solid #333;
+            padding: 0.8rem;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .captcha-box {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+            transform: scale(0.85);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--neon-purple);
+            border-radius: 15px;
+            color: white;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            box-shadow: 0 0 30px var(--neon-purple);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="glass-card" id="card">
+        <div class="image-container">
+            <div class="energy-ring"></div>
+            <img src="https://www.image2url.com/r2/default/images/1776030587172-5b7e2de8-a99f-43d0-97f9-d7d504cb2529.png" class="profile-img">
+        </div>
+        <h1>ENI :: BYPASS</h1>
+        <div class="tutorial">
+            <b>Tutorial:</b> Coloque o link do Loot-link abaixo, resolva o desafio e clique no botão para descriptografar.
+        </div>
+        <input type="text" id="targetUrl" placeholder="URL DO ALVO">
+        <div class="captcha-box">
+            <div class="g-recaptcha" data-sitekey="6LdmXrQsAAAAAOMpvGDrixXNuPHUTE97RsTJsava" data-theme="dark"></div>
+        </div>
+        <button onclick="execute()">Executar Protocolo</button>
+        <div id="status" class="mt-4 text-[10px] text-cyan-400 font-mono">IDLE_WAITING_COMMAND</div>
+    </div>
+
+    <script>
+        // Background 3D Particles
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        const geo = new THREE.BufferGeometry();
+        const pos = new Float32Array(1000 * 3);
+        for(let i=0; i<3000; i++) pos[i] = (Math.random()-0.5)*10;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const mat = new THREE.PointsMaterial({ size: 0.02, color: 0xa855f7 });
+        const points = new THREE.Points(geo, mat);
+        scene.add(points);
+        camera.position.z = 5;
+        function anim() { requestAnimationFrame(anim); points.rotation.y += 0.001; renderer.render(scene, camera); }
+        anim();
+
+        // Lógica de Envio para o Backend Vercel
+        async function execute() {
+            const status = document.getElementById('status');
+            const url = document.getElementById('targetUrl').value;
+            const token = grecaptcha.getResponse();
+
+            if(!url || !token) return status.innerText = "ERRO: PREENCHA TUDO";
+
+            status.innerText = "PROCESSANDO NO BACKEND...";
+
+            try {
+                const response = await fetch('/api/bypass', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, captchaToken: token })
+                });
+                const data = await response.json();
+                if(data.status === 'success') {
+                    status.innerText = "BYPASS CONCLUÍDO! REDIRECIONANDO...";
+                    window.location.href = data.destination;
+                } else {
+                    status.innerText = "ERRO: " + data.error;
+                }
+            } catch (e) {
+                status.innerText = "ERRO DE CONEXÃO COM O SERVIDOR";
+            }
+        }
+    </script>
+</body>
+</html>
+
+```
