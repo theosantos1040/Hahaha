@@ -2,39 +2,39 @@
 const axios = require('axios');
 
 export default async function handler(req, res) {
-    // Só aceita requisições POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Método não permitido' });
     }
 
     const { url, captchaToken } = req.body;
-    const secretKey = "6LdmXrQsAAAAANiFFgNLxihKX-RbnZehwYhDxP7U";
+    // Sua chave privada do hCaptcha
+    const secretKey = "ES_bddf600863194d1983ed6f67a5ba15cc";
 
     if (!url || !captchaToken) {
-        return res.status(400).json({ error: 'Faltam parâmetros: url ou captchaToken' });
+        return res.status(400).json({ error: 'Faltam parâmetros: link ou token do captcha' });
     }
 
     try {
-        // 1. Validar o ReCAPTCHA com a Google
-        const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`;
-        const response = await axios.post(googleVerifyUrl);
+        // Validar o token com o hCaptcha
+        const params = new URLSearchParams();
+        params.append('secret', secretKey);
+        params.append('response', captchaToken);
+
+        const response = await axios.post('https://hcaptcha.com/siteverify', params);
         const { success } = response.data;
 
         if (!success) {
-            return res.status(403).json({ error: 'Falha na validação do ReCAPTCHA' });
+            return res.status(403).json({ error: 'Falha na validação do hCaptcha' });
         }
 
-        // 2. Lógica de Bypass (Simulação)
-        // Aqui entraria a sua lógica específica para AdMaven ou Loot-Link
-        console.log(`Iniciando bypass para: ${url}`);
+        // Simulação do processamento de Bypass
+        // Aqui você pode adicionar sua lógica real de raspagem ou API externa
+        console.log(`Bypass solicitado para: ${url}`);
         
-        // Simulação de processamento bem sucedido
-        const finalLink = "https://link-desbloqueado.com/sucesso";
-
         return res.status(200).json({ 
             status: 'success', 
-            message: 'Bypass concluído com sucesso!',
-            destination: finalLink
+            message: 'Acesso liberado!',
+            destination: "https://seu-link-final.com" 
         });
 
     } catch (error) {
