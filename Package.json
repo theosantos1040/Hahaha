@@ -1,6 +1,6 @@
 {
-  "name": "aso-chat",
-  "version": "1.0.0",
+  "name": "aso-chat-netlify",
+  "version": "2.0.0",
   "type": "module",
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
